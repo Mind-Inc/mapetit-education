@@ -1,0 +1,65 @@
+import com.github.spotbugs.snom.SpotBugsReport
+import com.github.spotbugs.snom.SpotBugsTask
+
+plugins {
+	id 'java'
+	id "checkstyle"
+	id "com.github.spotbugs" version "5.0.13"
+	id 'org.springframework.boot' version '3.0.2'
+	id 'io.spring.dependency-management' version '1.1.0'
+	id 'com.google.cloud.tools.jib' version "3.3.1"
+}
+
+group = 'com.mindinc.edu.bpp'
+version = '0.0.1-SNAPSHOT'
+
+sourceCompatibility = '17'
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.2'
+	implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.1'
+	implementation 'org.bouncycastle:bcpkix-jdk15on:1.67'
+
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
+	runtimeOnly 'org.postgresql:postgresql'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
+
+spotbugs {
+	ignoreFailures = true
+	effort = 'max'
+	showProgress = true
+}
+
+checkstyle {
+	toolVersion = "10.6.0"
+	configFile = file("$rootDir/config/checkstyle/checkstyle.xml")
+	configProperties = [
+			suppressionsFile: "$rootDir/config/checkstyle/suppressions.xml",
+	]
+}
+
+tasks.withType(SpotBugsTask).configureEach {
+	reports(({
+		xml.enabled = true
+		html.enabled = false
+	} as Closure<NamedDomainObjectContainer<? extends SpotBugsReport>>))
+}
+
+jib {
+	from.image = 'eclipse-temurin:17-jre-focal'
+	to.image = 'mapetit/edu'
+}

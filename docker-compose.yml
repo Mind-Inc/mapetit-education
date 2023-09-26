@@ -1,0 +1,28 @@
+version: '3'
+
+services:
+
+  mapetit-db:
+    image: postgres:12.4
+    container_name: postgresql
+    ports:
+      - 5432:5432
+    volumes:
+      - ./postgres-data:/var/lib/postgresql
+      - ./schema.sql:/docker-entrypoint-initdb.d/schema.sql
+    environment:
+      POSTGRES_USER: mia_user
+      POSTGRES_PASSWORD: mia_user
+      POSTGRES_DB: map_jobdb
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8"
+    hostname: localhost
+    restart: always
+    user: root
+
+  mapetit-udm-v2:
+    image: mapetit/edu
+    container_name: "mapetit-edu"
+    ports:
+      - 8086:8086
+    environment:
+      DATABASE_HOST: mapetit-db
